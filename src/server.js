@@ -1,65 +1,117 @@
+// import express from "express";
+// import cors from "cors";
+// import pino from "pino-http";
+
+// import env from "./utils/env.js";
+
+// import movies from "./db/movies.js";
+
+// const port = env("PORT", "3000");
+
+// const startServer = ()=> {
+//     const app = express();
+
+//     const logger = pino({
+//         transport: {
+//             target: "pino-pretty"
+//         }
+//     });
+
+//     app.use(logger);
+//     app.use(cors());
+
+//     app.get("/api/movies", (req, res)=> {
+//         res.json(movies);
+//     })
+
+//     app.use((req, res)=> {
+//         res.status(404).json({
+//             message: "Not Found"
+//         })
+//     })
+
+//     app.listen(port, ()=> console.log(`Server running on ${port} PORT`))
+// }
+
+// export default startServer;
+
+// import express from 'express';
+// import cors from 'cors';
+// import movies from './db/movies.js';
+// const startServer = () => {
+//   const app = express();
+//   app.use(cors());
+
+//   app.get('/api/movies', (req, res) => {
+//     res.json(movies);
+//   });
+//   app.get((req, res) => {
+//     res.status(404).json({
+//       message: 'Not Found',
+//     });
+//   });
+//   app.listen(3000, () => {
+//     console.log('Server is runig 3000');
+//   });
+// };
+// export default startServer;
+
 import express from 'express';
-import { getAllStudents, getStudentById } from './service/students.js';
-import pino from 'pino-http';
 import cors from 'cors';
-import { env } from './utils/env.js';
-// import { get } from 'mongoose';
-
-const PORT = Number(env('PORT', '3000'));
-
-export const startServer = () => {
+import movies from './db/movies.js';
+import pino from 'pino-http';
+import { getMovies, getMovieById } from './services/movie-services.js';
+const startServer = () => {
   const app = express();
-
-  app.use(express.json());
+  const logger = pino({
+    transport: {
+      target: 'pino-pretty',
+    },
+  });
   app.use(cors());
+  app.use(logger);
 
-  app.use(
-    pino({
-      transport: {
-        target: 'pino-pretty',
-      },
-    }),
-  );
-
-  app.get('/', (req, res) => {
+  app.get('/api/movies', async (req, res) => {
+    const data = await getMovies();
     res.json({
-      message: 'Hello world!',
+      status: 200,
+      data,
+      message: 'Success',
     });
-  });
-  app.get('/students', async (req, res) => {
-    const students = await getAllStudents();
-    res.status(200).json({
-      data: students,
-    });
-  });
+  }),
+    app.get('/api/movies/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const data = await getMovieById(id);
+        if (!data) {
+          return res.status(404).json({
+            message: 'Movie  not found',
+          });
+        }
 
-  app.get('/students/:studentId', async (req, res) => {
-    const { studentId } = req.params;
-    const student = await getStudentById(studentId);
-    if (!student) {
-      res.status(404).json({
-        message: 'Student not found',
-      });
-    }
-    res.status(200).json({
-      data: student,
+        res.json({
+          status: 200,
+          data,
+          message: `Success with ${id}`,
+        });
+      } catch (error) {
+        if (error.message.includec('Cast to ObjectId failed')) {
+          error.status = 404;
+        }
+        const { status = 500 } = error;
+        res.status(status).json({
+          message: error.message,
+        });
+      }
     });
-  });
-
-  app.use('*', (req, res, next) => {
+  app.use((req, res) => {
     res.status(404).json({
       message: 'Not found',
     });
   });
-
-  app.use((err, req, res, next) => {
-    res.status(500).json({
-      message: 'Something went wrong',
-      error: err.message,
-    });
-  });
-
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  app.listen(3000, () => {
+    console.log('Server is runnig 3000');
   });
 };
+
+export default startServer;
