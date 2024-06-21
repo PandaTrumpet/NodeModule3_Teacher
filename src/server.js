@@ -64,6 +64,7 @@ import pino from 'pino-http';
 import moviesRouter from './routers/movies-router.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
+
 const startServer = () => {
   const app = express();
   const logger = pino({
@@ -73,9 +74,12 @@ const startServer = () => {
   });
   app.use(cors());
   app.use(logger);
+
   app.use('/api/movies', moviesRouter);
+
   app.use(notFoundHandler);
   app.use(errorHandler);
+
   app.listen(3000, () => {
     console.log('Server is runnig 3000');
   });
