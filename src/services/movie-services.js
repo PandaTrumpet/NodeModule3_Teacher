@@ -14,7 +14,7 @@ export const adddMOvie = (data) => Movie.create(data);
 export const upsertMovie = async (filter, data, options = {}) => {
   const result = await Movie.findOneAndUpdate(filter, data, {
     new: true,
-    includeResultMetadata: true,
+    includeResultMetadata: true, //додає нові властивості в Postman
     ...options,
   });
   if (!result || !result.value) return null;
@@ -25,3 +25,5 @@ export const upsertMovie = async (filter, data, options = {}) => {
     isNew,
   };
 };
+
+export const deleteMovie = (filter) => Movie.findOneAndDelete(filter);

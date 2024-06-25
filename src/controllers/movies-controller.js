@@ -3,6 +3,7 @@ import {
   getMovies,
   adddMOvie,
   upsertMovie,
+  deleteMovie,
 } from '../services/movie-services.js';
 import createHttpError from 'http-errors';
 export const getAllMoviesController = async (req, res) => {
@@ -70,5 +71,33 @@ export const updateMovieController = async (req, res) => {
     status,
     message,
     data: data.value,
+  });
+};
+
+export const patchMovieController = async (req, res) => {
+  const { id } = req.params;
+  const result = await upsertMovie({ _id: id }, req.body);
+  console.log(result);
+  if (!result) {
+    throw createHttpError(404, `Movie not found`);
+  }
+  res.json({
+    status: 200,
+    message: 'Movie update success',
+    data: result.data,
+  });
+};
+
+export const deleteMovieController = async (req, res) => {
+  const { id } = req.params;
+  const result = await deleteMovie({ _id: id });
+  if (!result) {
+    throw createHttpError(404, `Movie not found`);
+  }
+
+  res.json({
+    status: 200,
+    message: 'Delete movie success',
+    data: result,
   });
 };
