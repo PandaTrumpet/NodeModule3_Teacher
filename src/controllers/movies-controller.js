@@ -1,4 +1,9 @@
-import { getMovieById, getMovies } from '../services/movie-services.js';
+import {
+  getMovieById,
+  getMovies,
+  adddMOvie,
+  upsertMovie,
+} from '../services/movie-services.js';
 import createHttpError from 'http-errors';
 export const getAllMoviesController = async (req, res) => {
   const data = await getMovies();
@@ -42,4 +47,28 @@ export const getMovieByIdController = async (req, res) => {
   //     // });
   //     next(error);
   //   }
+};
+
+export const addMovieController = async (req, res) => {
+  // console.log(req.body);
+  const result = await adddMOvie(req.body);
+
+  res.status(201).json({
+    status: 201,
+    message: 'Successful',
+    data: result,
+  });
+};
+
+export const updateMovieController = async (req, res) => {
+  const { id } = req.params;
+  const data = await upsertMovie({ _id: id }, req.body, { upsert: true });
+  console.log(data);
+  const status = data.isNew ? 201 : 200;
+  const message = data.isNew ? 'Movie success add' : 'Movie update success';
+  res.json({
+    status,
+    message,
+    data: data.value,
+  });
 };

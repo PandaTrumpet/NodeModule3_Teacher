@@ -73,6 +73,7 @@ const startServer = () => {
     },
   });
   app.use(cors());
+  app.use(express.json()); //важно для вівода информации в консоль.Можно писать разные форматы
   app.use(logger);
 
   app.use('/api/movies', moviesRouter);
